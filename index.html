@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>柿柿小满的选择</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --shi:#F2762E; --shi-soft:#FFE1CC;
+  --man:#79B473; --man-soft:#E4F2DF;
+  --ink:#4A3B32; --ink-2:#9A8A80;
+  --card:#FFFDFA;
+  --shadow:0 12px 30px rgba(140,100,60,.13);
+  --r:20px;
+}
+html,body{min-height:100%}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  color:var(--ink);
+  background:
+    radial-gradient(760px 420px at 8% -12%, var(--shi-soft), transparent 62%),
+    radial-gradient(760px 420px at 102% 108%, var(--man-soft), transparent 62%),
+    #FFF9F3;
+  background-attachment:fixed;
+  padding:26px 16px 56px;
+  display:flex;justify-content:center;
+}
+.app{width:100%;max-width:560px;position:relative}
+
+/* ---------- header ---------- */
+header{text-align:center;margin-bottom:22px;position:relative}
+h1{
+  font-size:29px;letter-spacing:2px;font-weight:800;
+  background:linear-gradient(96deg,var(--shi),#E9A24B 45%,var(--man));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.sub{margin-top:7px;font-size:13px;color:var(--ink-2);letter-spacing:1px}
+.mute{
+  position:absolute;right:0;top:-4px;width:36px;height:36px;border:none;border-radius:50%;
+  background:rgba(255,255,255,.75);box-shadow:0 3px 10px rgba(140,100,60,.12);
+  font-size:16px;cursor:pointer;color:var(--ink);
+}
+.mute:active{transform:scale(.92)}
+
+/* ---------- stepbar ---------- */
+.steps{display:flex;justify-content:center;gap:8px;margin-bottom:20px}
+.steps b{display:block;height:5px;width:22px;border-radius:99px;background:#EADFD4;transition:.35s}
+.steps b.on{background:linear-gradient(90deg,var(--shi),var(--man));width:34px}
+.steps b.done{background:#D9C9B8}
+
+/* ---------- screens ---------- */
+.screen{display:none;animation:fade .38s ease both}
+.screen.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+.tip{text-align:center;font-size:15px;color:var(--ink-2);margin-bottom:16px;line-height:1.7}
+.tip em{font-style:normal;color:var(--ink);font-weight:700}
+
+/* who */
+.who{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.who-card{
+  background:var(--card);border:2px solid transparent;border-radius:var(--r);
+  padding:22px 10px;text-align:center;cursor:pointer;box-shadow:var(--shadow);
+  transition:.22s;
+}
+.who-card:active{transform:scale(.96)}
+.who-card .emo{font-size:38px;display:block;margin-bottom:8px}
+.who-card .nm{font-size:17px;font-weight:700;letter-spacing:1px}
+.who-card .ds{font-size:11px;color:var(--ink-2);margin-top:5px}
+.who-card[data-p="shi"].sel{border-color:var(--shi);background:linear-gradient(180deg,#FFF3E9,#FFFDFA)}
+.who-card[data-p="man"].sel{border-color:var(--man);background:linear-gradient(180deg,#EEF7EC,#FFFDFA)}
+
+/* count */
+.nums{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.num{
+  aspect-ratio:1/1;background:var(--card);border:2px solid transparent;border-radius:18px;
+  font-size:26px;font-weight:800;color:var(--ink);box-shadow:var(--shadow);cursor:pointer;transition:.22s;
+}
+.num:active{transform:scale(.94)}
+.num.sel{border-color:var(--shi);color:var(--shi);background:linear-gradient(180deg,#FFF1E6,#FFFDFA)}
+
+/* input */
+.fields{display:flex;flex-direction:column;gap:12px}
+.field{
+  background:var(--card);border-radius:16px;padding:12px 14px;box-shadow:var(--shadow);
+  display:flex;align-items:center;gap:12px;border:2px solid transparent;transition:.2s;
+}
+.field:focus-within{border-color:#EFD9C6}
+.field .tag{
+  flex:none;width:30px;height:30px;border-radius:9px;display:grid;place-items:center;
+  font-weight:800;font-size:14px;color:#fff;background:linear-gradient(135deg,#F79A5C,#F2762E);
+}
+.field:nth-child(2) .tag{background:linear-gradient(135deg,#F2B04E,#E9922B)}
+.field:nth-child(3) .tag{background:linear-gradient(135deg,#A8CC7E,#79B473)}
+.field:nth-child(4) .tag{background:linear-gradient(135deg,#7FC2A9,#4FA98C)}
+.field input{
+  flex:1;border:none;outline:none;background:transparent;font-size:15px;color:var(--ink);
+  font-family:inherit;letter-spacing:.5px;
+}
+.field input::placeholder{color:#C9BAB0}
+.eye{flex:none;border:none;background:transparent;font-size:15px;cursor:pointer;opacity:.55;padding:4px}
+.eye:active{transform:scale(.9)}
+
+.btn{
+  display:block;width:100%;margin-top:20px;padding:15px;border:none;border-radius:16px;
+  font-size:16px;font-weight:700;letter-spacing:2px;color:#fff;font-family:inherit;cursor:pointer;
+  background:linear-gradient(96deg,var(--shi),#E9A24B,var(--man));box-shadow:0 8px 20px rgba(240,140,70,.28);
+  transition:.2s;
+}
+.btn:active{transform:translateY(2px);box-shadow:0 4px 12px rgba(240,140,70,.25)}
+.btn.ghost{
+  background:#fff;color:var(--ink);border:1.5px solid #EADFD4;box-shadow:none;font-weight:600;
+}
+.btn:disabled{opacity:.45}
+
+/* handoff */
+.hand{text-align:center;padding:22px 18px;background:var(--card);border-radius:24px;box-shadow:var(--shadow)}
+.hand .big{font-size:52px;margin-bottom:12px}
+.hand h2{font-size:20px;margin-bottom:8px}
+.hand p{font-size:13px;color:var(--ink-2);line-height:1.8}
+
+/* cards */
+.deck{display:grid;gap:14px}
+.deck[data-n="1"]{grid-template-columns:1fr}
+.deck[data-n="2"]{grid-template-columns:1fr 1fr}
+.deck[data-n="3"],.deck[data-n="4"]{grid-template-columns:1fr 1fr}
+.card{
+  perspective:1200px;cursor:pointer;height:150px;
+  animation:pop .45s cubic-bezier(.2,1.3,.4,1) both;
+}
+.deck[data-n="1"] .card{height:210px}
+@keyframes pop{from{opacity:0;transform:translateY(22px) scale(.94)}to{opacity:1;transform:none}}
+.card-in{
+  position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .68s cubic-bezier(.4,.2,.2,1);
+}
+.card.flip .card-in{transform:rotateY(180deg)}
+.card.lock{cursor:default}
+.card.dim{opacity:.42;filter:saturate(.5);transition:.4s}
+.face{
+  position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;
+  border-radius:var(--r);display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:16px;text-align:center;box-shadow:var(--shadow);overflow:hidden;
+}
+.face.f{background:linear-gradient(160deg,#FFFDFA,#FFF0E2);border:1.5px solid #F6E2CE}
+.face.b{transform:rotateY(180deg);background:linear-gradient(160deg,#FFFFFF,#F3F9F0);border:1.5px solid #DCEBD6}
+.face .letter{font-size:40px;font-weight:800;letter-spacing:2px;color:var(--shi);line-height:1}
+.face .hint{font-size:11px;color:var(--ink-2);margin-top:10px;letter-spacing:1px}
+.face.f::after{
+  content:"";position:absolute;width:130px;height:130px;border-radius:50%;
+  background:radial-gradient(circle,rgba(242,118,46,.10),transparent 70%);right:-46px;bottom:-52px;
+}
+.face.b .letter{font-size:12px;color:var(--man);letter-spacing:3px;margin-bottom:8px;opacity:.85}
+.face.b .txt{font-size:16px;font-weight:700;line-height:1.55;word-break:break-word;max-height:96px;overflow:auto}
+.face.b .txt.long{font-size:13.5px}
+.face.b::after{
+  content:"";position:absolute;width:120px;height:120px;border-radius:50%;
+  background:radial-gradient(circle,rgba(121,180,115,.12),transparent 70%);left:-42px;top:-46px;
+}
+.face.b.win::before{
+  content:"";position:absolute;inset:0;border:2.5px solid var(--man);border-radius:var(--r);
+}
+
+.result{
+  margin-top:18px;text-align:center;font-size:15px;line-height:1.9;
+  background:var(--card);border-radius:18px;padding:14px 16px;box-shadow:var(--shadow);
+  animation:fade .4s ease both;
+}
+.result b{color:var(--shi)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+.row .btn{margin-top:0;font-size:14px;padding:13px;letter-spacing:1px}
+
+/* history */
+.log{margin-top:26px;background:rgba(255,255,255,.6);border-radius:18px;padding:14px 16px;border:1px dashed #EADFD4}
+.log h3{font-size:12px;color:var(--ink-2);letter-spacing:2px;font-weight:700;margin-bottom:10px}
+.log li{list-style:none;font-size:13px;padding:7px 0;border-bottom:1px dashed #F1E7DC;display:flex;gap:8px;align-items:center;animation:fade .3s ease both}
+.log li:last-child{border:none}
+.log li.gone{opacity:0;transform:translateX(16px);transition:.28s}
+.log .k{flex:none;font-weight:800;color:var(--shi);width:18px}
+.log .v{flex:1;color:var(--ink);word-break:break-word}
+.log .w{flex:none;color:var(--ink-2);font-size:11px;align-self:center}
+.log .del{
+  flex:none;border:none;background:transparent;color:#C9BAB0;font-size:14px;line-height:1;
+  cursor:pointer;padding:4px 2px 4px 6px;transition:.18s;
+}
+.log .del:hover{color:var(--shi)}
+.log .del:active{transform:scale(.85)}
+.log .empty{font-size:12px;color:#C3B4AA}
+.foot{text-align:center;margin-top:22px;font-size:11px;color:#C7B8AD;letter-spacing:1px}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header>
+    <h1>柿柿小满的选择</h1>
+    <p class="sub">把选择交给命运，把答案留给彼此</p>
+    <button class="mute" id="muteBtn" title="音效开关">🔊</button>
+  </header>
+
+  <div class="steps">
+    <b id="s0" class="on"></b><b id="s1"></b><b id="s2"></b><b id="s3"></b>
+  </div>
+
+  <!-- 1 谁出题 -->
+  <section class="screen active" id="sc-who">
+    <p class="tip">这一轮，<em>谁</em> 来出题？</p>
+    <div class="who">
+      <div class="who-card" data-p="shi">
+        <span class="emo">🍊</span><div class="nm">柿子</div><div class="ds">甜得坦坦荡荡</div>
+      </div>
+      <div class="who-card" data-p="man">
+        <span class="emo">🌾</span><div class="nm">小满</div><div class="ds">满的刚刚好好</div>
+      </div>
+    </div>
+    <button class="btn" id="btnWho" disabled>就我来出题</button>
+  </section>
+
+  <!-- 2 选几个 -->
+  <section class="screen" id="sc-count">
+    <p class="tip"><em id="whoName">柿子</em> 要给 <em id="otherName">小满</em> 准备 <em>几个</em> 选项？</p>
+    <div class="nums">
+      <button class="num" data-n="1">1</button>
+      <button class="num" data-n="2">2</button>
+      <button class="num" data-n="3">3</button>
+      <button class="num" data-n="4">4</button>
+    </div>
+    <button class="btn" id="btnCount" disabled>开始写选项</button>
+    <button class="btn ghost" id="back1">上一步</button>
+  </section>
+
+  <!-- 3 写内容 -->
+  <section class="screen" id="sc-input">
+    <p class="tip">写下 <em id="cntTxt">2</em> 个选项的内容<br><span style="font-size:12px">别被对方偷看到了</span></p>
+    <div class="fields" id="fields"></div>
+    <button class="btn" id="btnInput" disabled>写好了，交给 TA</button>
+    <button class="btn ghost" id="back2">上一步</button>
+  </section>
+
+  <!-- 4 交接 -->
+  <section class="screen" id="sc-hand">
+    <div class="hand">
+      <div class="big">🤫</div>
+      <h2>请把手机交给 <span id="handName">小满</span></h2>
+      <p>选项已经藏好了，<br>只有 TA 翻开卡片，才知道命运写了什么。</p>
+      <button class="btn" id="btnHand">我是 <span id="handName2">小满</span>，我来选</button>
+    </div>
+  </section>
+
+  <!-- 5 翻牌 -->
+  <section class="screen" id="sc-pick">
+    <p class="tip" id="pickTip">点开一张卡片，看看命运给你留了什么</p>
+    <div class="deck" id="deck" data-n="2"></div>
+    <div id="resultBox"></div>
+    <div class="row" id="actRow" style="display:none">
+      <button class="btn ghost" id="btnRegret">后悔了，重选</button>
+      <button class="btn" id="btnAgain">再玩一轮</button>
+    </div>
+  </section>
+
+  <div class="log">
+    <h3>🍅 小本本</h3>
+    <ul id="logList"><li class="empty">还没有记录，等你们的第一张牌～</li></ul>
+  </div>
+
+  <p class="foot">柿柿小满 · 选择即答案</p>
+</div>
+
+<script>
+/* ============ 状态 ============ */
+const NAME = {shi:{n:'柿子',e:'🍊'}, man:{n:'小满',e:'🌾'}};
+const LABEL = ['A','B','C','D'];
+const S = {setter:null, chooser:null, count:0, opts:[], picked:-1, locked:false};
+const LOG = [];
+
+/* ============ 音效 ============ */
+let ac=null, muted=false;
+function blip(f=660, d=.09, type='sine', vol=.16){
+  if(muted) return;
+  try{
+    ac = ac || new (window.AudioContext||window.webkitAudioContext)();
+    const o=ac.createOscillator(), g=ac.createGain();
+    o.type=type; o.frequency.value=f;
+    g.gain.setValueAtTime(vol,ac.currentTime);
+    g.gain.exponentialRampToValueAtTime(.001, ac.currentTime+d);
+    o.connect(g); g.connect(ac.destination); o.start(); o.stop(ac.currentTime+d);
+  }catch(e){}
+}
+document.getElementById('muteBtn').onclick = e=>{
+  muted=!muted; e.target.textContent = muted?'🔇':'🔊'; if(!muted) blip(760,.07);
+};
+
+/* ============ 屏幕切换 ============ */
+function show(id, step){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  [0,1,2,3].forEach(i=>{
+    const b=document.getElementById('s'+i);
+    b.className = i<step?'done':(i===step?'on':'');
+  });
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ============ 1 谁出题 ============ */
+let whoTmp=null;
+document.querySelectorAll('.who-card').forEach(c=>{
+  c.onclick=()=>{
+    document.querySelectorAll('.who-card').forEach(x=>x.classList.remove('sel'));
+    c.classList.add('sel'); whoTmp=c.dataset.p;
+    document.getElementById('btnWho').disabled=false;
+    blip(560,.08,'triangle');
+  };
+});
+document.getElementById('btnWho').onclick=()=>{
+  if(!whoTmp) return;
+  S.setter=whoTmp; S.chooser = whoTmp==='shi'?'man':'shi';
+  document.getElementById('whoName').textContent = NAME[S.setter].n;
+  document.getElementById('otherName').textContent = NAME[S.chooser].n;
+  show('sc-count',1); blip(720,.1);
+};
+
+/* ============ 2 选数量 ============ */
+let cntTmp=0;
+document.querySelectorAll('.num').forEach(b=>{
+  b.onclick=()=>{
+    document.querySelectorAll('.num').forEach(x=>x.classList.remove('sel'));
+    b.classList.add('sel'); cntTmp=+b.dataset.n;
+    document.getElementById('btnCount').disabled=false;
+    blip(600+parseInt(b.dataset.n,10)*80,.08,'triangle');
+  };
+});
+document.getElementById('btnCount').onclick=()=>{
+  if(!cntTmp) return;
+  S.count=cntTmp;
+  document.getElementById('cntTxt').textContent=cntTmp;
+  buildFields(); show('sc-input',2); blip(720,.1);
+};
+document.getElementById('back1').onclick=()=>{show('sc-who',0);blip(420,.07);};
+
+/* ============ 3 写选项 ============ */
+function buildFields(){
+  const box=document.getElementById('fields'); box.innerHTML='';
+  for(let i=0;i<S.count;i++){
+    const d=document.createElement('div'); d.className='field';
+    d.innerHTML = `<span class="tag">${LABEL[i]}</span>
+      <input type="password" maxlength="40" placeholder="${LABEL[i]} 选项写点什么…" autocomplete="off">
+      <button class="eye" title="显示/隐藏">🙈</button>`;
+    const inp=d.querySelector('input'), eye=d.querySelector('.eye');
+    inp.oninput=checkInput;
+    eye.onclick=()=>{
+      const hide = inp.type==='password';
+      inp.type = hide?'text':'password';
+      eye.textContent = hide?'🙉':'🙈';
+    };
+    box.appendChild(d);
+  }
+  checkInput();
+}
+function checkInput(){
+  const ins=[...document.querySelectorAll('#fields input')];
+  const ok = ins.length>0 && ins.every(i=>i.value.trim().length>0);
+  document.getElementById('btnInput').disabled=!ok;
+}
+document.getElementById('btnInput').onclick=()=>{
+  S.opts=[...document.querySelectorAll('#fields input')].map(i=>i.value.trim());
+  const other=NAME[S.chooser].n;
+  document.getElementById('handName').textContent=other;
+  document.getElementById('handName2').textContent=other;
+  show('sc-hand',2); blip(820,.12);
+};
+document.getElementById('back2').onclick=()=>{show('sc-count',1);blip(420,.07);};
+
+/* ============ 4 交接 ============ */
+document.getElementById('btnHand').onclick=()=>{
+  buildDeck(); show('sc-pick',3); blip(880,.12,'triangle');
+};
+
+/* ============ 5 翻牌 ============ */
+function buildDeck(){
+  const deck=document.getElementById('deck');
+  deck.innerHTML=''; deck.dataset.n=S.count;
+  document.getElementById('resultBox').innerHTML='';
+  document.getElementById('actRow').style.display='none';
+  S.picked=-1; S.locked=false;
+  S.opts.forEach((t,i)=>{
+    const c=document.createElement('div');
+    c.className='card'; c.style.animationDelay=(i*.09)+'s';
+    const long = t.length>14 ? ' long':'';
+    c.innerHTML=`<div class="card-in">
+        <div class="face f"><div class="letter">${LABEL[i]}</div><div class="hint">点我翻开</div></div>
+        <div class="face b${i===0?'':''}"><div class="letter">${LABEL[i]}</div><div class="txt${long}"></div></div>
+      </div>`;
+    c.querySelector('.txt').textContent=t;
+    c.onclick=()=>flip(c,i);
+    deck.appendChild(c);
+  });
+  document.getElementById('pickTip').innerHTML =
+    `<em>${NAME[S.chooser].n}</em>，点开一张卡片<br>看看 <em>${NAME[S.setter].n}</em> 给你留了什么`;
+}
+function flip(card,i){
+  if(S.locked) return;
+  S.locked=true; S.picked=i;
+  card.classList.add('flip');
+  card.querySelector('.face.b').classList.add('win');
+  document.querySelectorAll('.card').forEach((c,k)=>{ if(k!==i) c.classList.add('dim','lock'); });
+  blip(520+ i*90,.14,'triangle');
+  setTimeout(()=>{ blip(1040,.16,'sine',.12); showResult(i); },620);
+}
+function showResult(i){
+  const box=document.getElementById('resultBox');
+  box.innerHTML=`<div class="result">
+      你翻开了 <b>${LABEL[i]}</b><br>
+      <span style="font-size:13px;color:#9A8A80">—— ${NAME[S.setter].n} 写下的答案</span>
+    </div>`;
+  document.getElementById('actRow').style.display='grid';
+  document.getElementById('pickTip').innerHTML = `命运选中了 <em>${LABEL[i]}</em> ✨`;
+  LOG.unshift({id:Date.now()+'-'+Math.random().toString(36).slice(2,7), setter:NAME[S.setter].n, chooser:NAME[S.chooser].n, k:LABEL[i], v:S.opts[i]});
+  renderLog();
+}
+document.getElementById('btnRegret').onclick=()=>{
+  if(S.picked<0) return;
+  const cards=[...document.querySelectorAll('.card')];
+  cards.forEach(c=>{c.classList.remove('flip','dim','lock'); c.querySelector('.face.b').classList.remove('win');});
+  document.getElementById('resultBox').innerHTML='';
+  document.getElementById('actRow').style.display='none';
+  document.getElementById('pickTip').innerHTML='再想想，重新翻开一张～';
+  S.picked=-1; S.locked=false; blip(380,.1);
+};
+document.getElementById('btnAgain').onclick=()=>{ show('sc-who',0); blip(700,.1); };
+
+function renderLog(){
+  const ul=document.getElementById('logList');
+  if(!LOG.length){ ul.innerHTML='<li class="empty">还没有记录，等你们的第一张牌～</li>'; return; }
+  ul.innerHTML = LOG.slice(0,20).map(r=>
+    `<li data-id="${r.id}">
+       <span class="k">${r.k}</span>
+       <span class="v">${escape(r.v)}</span>
+       <span class="w">${r.setter} → ${r.chooser}</span>
+       <button class="del" title="删除这条记录">✕</button>
+     </li>`
+  ).join('');
+}
+document.getElementById('logList').onclick = e=>{
+  const btn = e.target.closest('.del');
+  if(!btn) return;
+  const li = btn.closest('li');
+  const id = li.dataset.id;
+  li.classList.add('gone');
+  blip(300,.08,'triangle');
+  setTimeout(()=>{
+    const i = LOG.findIndex(x=>x.id===id);
+    if(i>-1) LOG.splice(i,1);
+    renderLog();
+  },280);
+};
+function escape(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+</script>
+</body>
+</html>
