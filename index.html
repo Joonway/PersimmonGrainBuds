@@ -96,8 +96,10 @@ h1{
 .field:nth-child(4) .tag{background:linear-gradient(135deg,#7FC2A9,#4FA98C)}
 .field input{
   flex:1;border:none;outline:none;background:transparent;font-size:15px;color:var(--ink);
-  font-family:inherit;letter-spacing:.5px;
+  font-family:inherit;letter-spacing:.5px;ime-mode:auto;
 }
+/* 用 CSS 打码代替 type=password：密码框在 iOS / 微信里无法输入中文 */
+.field input.mask{-webkit-text-security:disc;text-security:disc}
 .field input::placeholder{color:#C9BAB0}
 .eye{flex:none;border:none;background:transparent;font-size:15px;cursor:pointer;opacity:.55;padding:4px}
 .eye:active{transform:scale(.9)}
@@ -172,7 +174,19 @@ h1{
 
 /* history */
 .log{margin-top:26px;background:rgba(255,255,255,.6);border-radius:18px;padding:14px 16px;border:1px dashed #EADFD4}
-.log h3{font-size:12px;color:var(--ink-2);letter-spacing:2px;font-weight:700;margin-bottom:10px}
+.log h3{font-size:12px;color:var(--ink-2);letter-spacing:2px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
+.log-tools{display:flex;align-items:center;gap:10px;letter-spacing:0}
+.log-cnt{font-size:11px;color:#C3B4AA;font-weight:400}
+.log .clear{
+  border:1px solid #EADFD4;background:#fff;color:var(--ink-2);font-family:inherit;
+  font-size:11px;font-weight:600;padding:4px 10px;border-radius:99px;cursor:pointer;transition:.18s;
+}
+.log .clear:hover{color:var(--shi);border-color:var(--shi)}
+.log .clear:active{transform:scale(.92)}
+.log .clear.armed{background:var(--shi);color:#fff;border-color:var(--shi)}
+.log ul{max-height:260px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.log ul::-webkit-scrollbar{width:4px}
+.log ul::-webkit-scrollbar-thumb{background:#EADFD4;border-radius:99px}
 .log li{list-style:none;font-size:13px;padding:7px 0;border-bottom:1px dashed #F1E7DC;display:flex;gap:8px;align-items:center;animation:fade .3s ease both}
 .log li:last-child{border:none}
 .log li.gone{opacity:0;transform:translateX(16px);transition:.28s}
@@ -233,6 +247,9 @@ h1{
   <section class="screen" id="sc-input">
     <p class="tip">写下 <em id="cntTxt">2</em> 个选项的内容<br><span style="font-size:12px">别被对方偷看到了</span></p>
     <div class="fields" id="fields"></div>
+    <p id="maskWarn" style="display:none;font-size:11px;color:#C3B4AA;text-align:center;margin-top:10px">
+      当前浏览器不支持隐藏输入，写的时候注意遮挡一下哦
+    </p>
     <button class="btn" id="btnInput" disabled>写好了，交给 TA</button>
     <button class="btn ghost" id="back2">上一步</button>
   </section>
@@ -254,13 +271,19 @@ h1{
     <div id="resultBox"></div>
     <div class="row" id="actRow" style="display:none">
       <button class="btn ghost" id="btnRegret">后悔了，重选</button>
-      <button class="btn" id="btnAgain">再玩一轮</button>
+      <button class="btn" id="btnAgain">再来</button>
     </div>
   </section>
 
   <div class="log">
-    <h3>🍅 小本本</h3>
-    <ul id="logList"><li class="empty">还没有记录，等你们的第一张牌～</li></ul>
+    <h3>
+      <span>🍅 小本本</span>
+      <span class="log-tools">
+        <span class="log-cnt" id="logCnt"></span>
+        <button class="clear" id="btnClear" title="清空全部记录">清空</button>
+      </span>
+    </h3>
+    <ul id="logList"><li class="empty">还没记录</li></ul>
   </div>
 
   <p class="foot">柿柿小满 · 选择即答案</p>
@@ -271,7 +294,23 @@ h1{
 const NAME = {shi:{n:'柿子',e:'🍊'}, man:{n:'小满',e:'🌾'}};
 const LABEL = ['A','B','C','D'];
 const S = {setter:null, chooser:null, count:0, opts:[], picked:-1, locked:false};
-const LOG = [];
+
+/* ============ 小本本：本地永久保存 ============ */
+const KEY = 'shishi-xiaoman-log-v1';
+const MAX = 200;
+function loadLog(){
+  try{
+    const raw = localStorage.getItem(KEY);
+    if(!raw) return [];
+    const arr = JSON.parse(raw);
+    return Array.isArray(arr) ? arr.filter(r=>r && r.v) : [];
+  }catch(e){ return []; }
+}
+function saveLog(){
+  try{ localStorage.setItem(KEY, JSON.stringify(LOG.slice(0,MAX))); }
+  catch(e){}
+}
+const LOG = loadLog();
 
 /* ============ 音效 ============ */
 let ac=null, muted=false;
@@ -338,19 +377,26 @@ document.getElementById('btnCount').onclick=()=>{
 document.getElementById('back1').onclick=()=>{show('sc-who',0);blip(420,.07);};
 
 /* ============ 3 写选项 ============ */
+/* 浏览器是否支持 CSS 打码（Firefox 桌面版不支持，此时内容会明文显示） */
+const CAN_MASK = (function(){
+  const s = CSSStyleDeclaration.prototype;
+  return ('webkitTextSecurity' in s) || ('textSecurity' in s);
+})();
 function buildFields(){
   const box=document.getElementById('fields'); box.innerHTML='';
+  document.getElementById('maskWarn').style.display = CAN_MASK ? 'none' : 'block';
   for(let i=0;i<S.count;i++){
     const d=document.createElement('div'); d.className='field';
     d.innerHTML = `<span class="tag">${LABEL[i]}</span>
-      <input type="password" maxlength="40" placeholder="${LABEL[i]} 选项写点什么…" autocomplete="off">
+      <input type="text" class="mask" maxlength="40" placeholder="${LABEL[i]} 选项写点什么…"
+             autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" inputmode="text">
       <button class="eye" title="显示/隐藏">🙈</button>`;
     const inp=d.querySelector('input'), eye=d.querySelector('.eye');
     inp.oninput=checkInput;
     eye.onclick=()=>{
-      const hide = inp.type==='password';
-      inp.type = hide?'text':'password';
-      eye.textContent = hide?'🙉':'🙈';
+      const masked = !inp.classList.contains('mask');
+      inp.classList.toggle('mask', masked);
+      eye.textContent = masked?'🙈':'🙉';
     };
     box.appendChild(d);
   }
@@ -414,8 +460,9 @@ function showResult(i){
     </div>`;
   document.getElementById('actRow').style.display='grid';
   document.getElementById('pickTip').innerHTML = `命运选中了 <em>${LABEL[i]}</em> ✨`;
-  LOG.unshift({id:Date.now()+'-'+Math.random().toString(36).slice(2,7), setter:NAME[S.setter].n, chooser:NAME[S.chooser].n, k:LABEL[i], v:S.opts[i]});
-  renderLog();
+  LOG.unshift({id:Date.now()+'-'+Math.random().toString(36).slice(2,7), t:Date.now(), setter:NAME[S.setter].n, chooser:NAME[S.chooser].n, k:LABEL[i], v:S.opts[i]});
+  if(LOG.length>MAX) LOG.length=MAX;
+  saveLog(); renderLog();
 }
 document.getElementById('btnRegret').onclick=()=>{
   if(S.picked<0) return;
@@ -430,15 +477,26 @@ document.getElementById('btnAgain').onclick=()=>{ show('sc-who',0); blip(700,.1)
 
 function renderLog(){
   const ul=document.getElementById('logList');
-  if(!LOG.length){ ul.innerHTML='<li class="empty">还没有记录，等你们的第一张牌～</li>'; return; }
-  ul.innerHTML = LOG.slice(0,20).map(r=>
+  const cnt=document.getElementById('logCnt');
+  const clr=document.getElementById('btnClear');
+  cnt.textContent = LOG.length ? LOG.length+' 条' : '';
+  clr.style.display = LOG.length ? 'inline-block' : 'none';
+  if(!LOG.length){ ul.innerHTML='<li class="empty">还没记录</li>'; return; }
+  ul.innerHTML = LOG.map(r=>
     `<li data-id="${r.id}">
        <span class="k">${r.k}</span>
        <span class="v">${escape(r.v)}</span>
-       <span class="w">${r.setter} → ${r.chooser}</span>
+       <span class="w">${r.setter} → ${r.chooser}${r.t?' · '+fmt(r.t):''}</span>
        <button class="del" title="删除这条记录">✕</button>
      </li>`
   ).join('');
+}
+function fmt(t){
+  const d=new Date(t), n=new Date();
+  const p=x=>String(x).padStart(2,'0');
+  const hm=p(d.getHours())+':'+p(d.getMinutes());
+  if(d.toDateString()===n.toDateString()) return '今天 '+hm;
+  return (d.getMonth()+1)+'/'+d.getDate()+' '+hm;
 }
 document.getElementById('logList').onclick = e=>{
   const btn = e.target.closest('.del');
@@ -450,9 +508,28 @@ document.getElementById('logList').onclick = e=>{
   setTimeout(()=>{
     const i = LOG.findIndex(x=>x.id===id);
     if(i>-1) LOG.splice(i,1);
-    renderLog();
+    saveLog(); renderLog();
   },280);
 };
+/* 清空：点一次变红确认，再点一次才真的清 */
+let armed=false, armTimer=null;
+document.getElementById('btnClear').onclick = e=>{
+  e.target.blur();
+  if(!armed){
+    armed=true; e.target.classList.add('armed'); e.target.textContent='确定清空?';
+    blip(420,.08,'triangle');
+    armTimer=setTimeout(disarm,3000);
+    return;
+  }
+  clearTimeout(armTimer); disarm();
+  LOG.length=0; saveLog(); renderLog(); blip(280,.14);
+};
+function disarm(){
+  armed=false;
+  const b=document.getElementById('btnClear');
+  b.classList.remove('armed'); b.textContent='清空';
+}
+renderLog();
 function escape(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
 </script>
 </body>
